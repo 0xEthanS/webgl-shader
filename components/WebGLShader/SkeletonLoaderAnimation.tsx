@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useRef } from "react";
-import { lerp } from "@/utils/math/lerp";
-import { StyleOptions, useStyles } from "@/utils/styles";
-import { useVisible } from "@/utils/hooks/useVisible";
+import { lerp } from "@/components/WebGLShader/utils/math/lerp";
+import { StyleOptions, useStyles } from "@/components/WebGLShader/utils/styles";
+import { useVisible } from "@/components/WebGLShader/utils/hooks/useVisible";
 
 const SHADE_W = 1000;
 

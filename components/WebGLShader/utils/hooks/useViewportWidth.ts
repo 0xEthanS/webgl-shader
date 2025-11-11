@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { cssVariables } from "@/utils/cssVariables";
+import { cssVariables } from "@/components/WebGLShader/utils/cssVariables";
 
 const createUseViewportWidth = (isomorphic: boolean) => () => {
   const [width, setWidth] = useState<number | null>(() => {

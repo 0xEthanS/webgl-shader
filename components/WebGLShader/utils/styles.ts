@@ -1,6 +1,6 @@
 import { css, keyframes } from "@emotion/css";
 import React, { useContext, useMemo } from "react";
-import { colors } from "@/utils/cssVariables";
+import { colors } from "@/components/WebGLShader/utils/cssVariables";
 
 export interface StyleOptions {
   theme: typeof colors;

@@ -5,7 +5,13 @@ import { WebGLShaderLoader } from "@/components/WebGLShader/WebGLShaderLoader";
 
 export default function Home() {
 	return (
-		<div>
+		<div className="
+				w-full
+				bg-cyan-300
+			"
+		>
+
+
 			<WebGLShaderLoader 
 				fragmentShader="final" 
 				skew 
@@ -13,8 +19,12 @@ export default function Home() {
 				minWidth={600} 
 				maintainHeight={0.3} 
 				seed={16192} 
-				colorConfiguration={["default", "blue_to_yellow", "green"]} 
+				colorConfiguration={
+					["default", "blue_to_yellow", "green"]
+				} 
 			/>
+
+
 		</div>
 	);
 }

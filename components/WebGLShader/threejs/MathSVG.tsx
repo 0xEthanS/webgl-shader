@@ -1,4 +1,4 @@
-import { StyleOptions, useStyles } from "@/utils/styles";
+import { StyleOptions, useStyles } from "@/components/WebGLShader/utils/styles";
 import { getMathSvg, getMathSvgDimensions } from "@/components/WebGLShader/threejs/math-svg";
 
 const styles = ({ styled }: StyleOptions) => ({
