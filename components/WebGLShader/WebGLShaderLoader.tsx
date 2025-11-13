@@ -12,11 +12,6 @@ import {
 } from "@/components/WebGLShader/utils/styles";
 
 
-import { cssVariables } from "@/components/WebGLShader/utils/cssVariables";
-import { SKEW_DEG } from "@/components/WebGLShader/constants";
-
-
-
 
 
 
@@ -43,20 +38,20 @@ const styles = (
 ) => ({
 	container: styled.css`
 		width: 100vw;
-		margin: 40px -${cssVariables.contentPadding}px;
+		margin: 40px -24px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 
 		&--skew {
-			margin: calc(32px + min(100vw, ${cssVariables.contentWidth}px) * 0.04) -${cssVariables.contentPadding}px
-				calc(48px + min(100vw, ${cssVariables.contentWidth}px) * 0.04);
+			margin: calc(32px + min(100vw, 750px) * 0.04) -24px
+				calc(48px + min(100vw, 750px) * 0.04);
 		}
 	`,
 
 	colorButtonWrapper: styled.css`
 		margin-top: 40px;
-		padding: 0 ${cssVariables.contentPadding}px;
+		padding: 0 24px;
 		display: flex;
 		gap: 24px;
 		flex-wrap: wrap;
@@ -84,7 +79,7 @@ const styles = (
 		outline: 0px solid ${theme.background};
 
 		&--skew {
-			transform: skewY(${SKEW_DEG}deg) skewX(-12deg);
+			transform: skewY(6deg) skewX(-12deg);
 		}
 
 		@media (max-width: 450px) {

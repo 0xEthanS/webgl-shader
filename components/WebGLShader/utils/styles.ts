@@ -1,5 +1,5 @@
 import { css, keyframes } from "@emotion/css";
-import React, { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { colors } from "@/components/WebGLShader/utils/cssVariables";
 
 
@@ -14,11 +14,6 @@ export interface StyleOptions {
 
 
 
-const ThemeContext = React.createContext({ red: "", blue: "" });
-
-
-
-
 export function useStyles<T extends Record<string, string>>(
 	stylesheet: (
 		options: StyleOptions
@@ -27,8 +22,9 @@ export function useStyles<T extends Record<string, string>>(
 
 
 
+	
 
-	const theme = useContext(ThemeContext);
+	
 
 
 
@@ -43,7 +39,17 @@ export function useStyles<T extends Record<string, string>>(
 		});
 
 
-		return (className: keyof T & string, props: Partial<Record<string, boolean>> = {}) => {
+
+
+		return (
+			className: keyof T & string, 
+			props: Partial<Record<string, boolean>> = {}
+		) => {
+
+			//console.log("---------- ClassName: ", className)
+			//console.log("---------- Props: ", props)
+
+
 
 			const baseClassName = classNames[className];
 
@@ -63,7 +69,7 @@ export function useStyles<T extends Record<string, string>>(
 			return parts.join(" ");
 			
 		};
-	}, [theme]);
+	},[]);
 
 
 

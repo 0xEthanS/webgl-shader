@@ -7,16 +7,21 @@ import {
 } from "@/components/WebGLShader/utils/styles";
 
 
-import { cssVariables } from "@/components/WebGLShader/utils/cssVariables";
 import { useViewportWidth } from "@/components/WebGLShader/utils/hooks/useViewportWidth";
 import { fragmentShaderRegistry } from "@/components/WebGLShader/shaders/fragmentShaders";
 import { WebGLRenderer } from "@/components/WebGLShader/WebGLRenderer";
-import { ColorConfiguration, colorConfigurations } from "@/components/WebGLShader/colorConfigurations";
-import { vertexShaderRegistry } from "@/components/WebGLShader/shaders/vertexShaders";
-import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "@/components/WebGLShader/constants";
-import { FragmentShader } from "@/components/WebGLShader/shaders/types";
-import { clamp } from "@/components/WebGLShader/utils/math/lerp";
 
+
+import { 
+	ColorConfiguration, 
+	colorConfigurations 
+} from "@/components/WebGLShader/colorConfigurations";
+
+
+import { vertexShaderRegistry } from "@/components/WebGLShader/shaders/vertexShaders";
+
+
+import { FragmentShader } from "@/components/WebGLShader/shaders/types";
 
 
 
@@ -27,13 +32,15 @@ function calculateWebGLCanvasDimensions(
 	minWidth: number | undefined,
 	viewportWidth: number
 ) {
-	let height = DEFAULT_HEIGHT
+	let height = 250
+
+
+	const width = Math.max(minWidth!, Math.min(viewportWidth, viewportWidth))
 	
-	const width = clamp(
-		viewportWidth,
-		minWidth ?? viewportWidth,
-		viewportWidth,
-	);
+
+
+
+
 	if (maintainHeight != null) {
 		const fac = (Math.max(1, width / viewportWidth) - 1) * maintainHeight;
 		height *= 1 + fac;
@@ -42,6 +49,10 @@ function calculateWebGLCanvasDimensions(
 
 	return [width, height];
 }
+
+
+
+
 
 
 const styles = ({ styled }: StyleOptions) => ({
@@ -56,7 +67,7 @@ const styles = ({ styled }: StyleOptions) => ({
 		}
 
 		&--skew {
-			transform: skewY(-${SKEW_DEG}deg);
+			transform: skewY(-6deg);
 		}
 	`,
 
@@ -66,14 +77,14 @@ const styles = ({ styled }: StyleOptions) => ({
 		display: flex;
 		gap: 32px;
 		align-items: flex-start;
-		padding-left: ${cssVariables.contentPadding}px;
-		padding-right: ${cssVariables.contentPadding}px;
+		padding-left: 24px;
+		padding-right: 24px;
 		padding-top: 20px;
-		height: ${CONTROLS_HEIGHT}px;
+		height: 72px;
 		max-width: 100%;
 		box-sizing: border-box;
 
-		@media (max-width: ${cssVariables.mobileWidth}px) {
+		@media (max-width: 800px) {
 			padding-top: 40px;
 		}
 	`,
@@ -138,13 +149,11 @@ export const WebGLShader = (
 ) => {
 
 
-
-
-
-	const showControls = true; 
 	const animate = true; 
 
+	const viewportWidth = useViewportWidth()!;
 
+	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
 
@@ -152,14 +161,11 @@ export const WebGLShader = (
 	const STYLES = useStyles(styles);
 
 
-	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const FRAGMENTSHADER = useFragmentShader(fragmentShader);
 
 
 
 
-
-
-	const viewportWidth = useViewportWidth()!;
 
 
 	const [width, HEIGHT] = calculateWebGLCanvasDimensions(
@@ -173,11 +179,6 @@ export const WebGLShader = (
 
 
 	const canvasScale = Math.ceil(HEIGHT * idealScale) / HEIGHT;
-
-
-
-
-	const FRAGMENTSHADER = useFragmentShader(fragmentShader);
 
 
 
@@ -197,34 +198,17 @@ export const WebGLShader = (
 	});
 
 
-
-
 	const pendingUniformWrites = useRef<[string, number][]>([]);
 
 
-	const colorConfigurationRef = useRef(colorConfiguration);
-
-
-	colorConfigurationRef.current = colorConfiguration;
-
-
-
-
 	useEffect(() => {
-
 		let resized = true;
 		let stop = false;
-
-
-
-
 		const canvas = canvasRef.current;
+
 
 		if (!canvas) return;
 
-		if (!colorConfigurations[colorConfiguration]) {
-			console.warn(colorConfiguration);
-		}
 
 		const renderer = new WebGLRenderer(
 			canvas,
@@ -234,18 +218,14 @@ export const WebGLShader = (
 			seed,
 		);
 
+
 		for (const [key, value] of Object.entries(uniformValues)) {
 			pendingUniformWrites.current.push([key, value]);
 		}
 
-		if (!animate) renderer.setTimeSpeed(0, 0);
-
-		let lastColorConfiguration = colorConfiguration;
-
-		
 
 		function tick() {
-			
+
 			if (stop) return;
 
 			requestAnimationFrame(tick);
@@ -260,11 +240,6 @@ export const WebGLShader = (
 				resized = false;
 			}
 
-			if (lastColorConfiguration !== colorConfigurationRef.current) {
-				lastColorConfiguration = colorConfigurationRef.current;
-				renderer.setColorConfig(colorConfigurations[lastColorConfiguration]);
-			}
-
 			for (let [key, value] of pendingUniformWrites.current) {
 				renderer.setUniform(key, value);
 			}
@@ -275,42 +250,27 @@ export const WebGLShader = (
 
 		}
 
+
 		tick();
+
 
 		const resizeListener = () => (resized = true);
 
+
 		window.addEventListener("resize", resizeListener);
+
 
 		return () => {
 			stop = true;
 			window.removeEventListener("resize", resizeListener);
 		};
+		
 
 	}, [FRAGMENTSHADER, animate]);
 
 
 
 
-	const uniformEntries = useMemo(
-		() => Object.entries(FRAGMENTSHADER.uniforms), [FRAGMENTSHADER]
-	);
-
-
-
-
-	useEffect(() => {
-
-		const shouldHaveUsesVariablesProp = uniformEntries.length > 0 && showControls;
-
-		const usesVariables = false;
-
-		if (shouldHaveUsesVariablesProp !== usesVariables) {
-			console.warn(
-				`'usesVariables' should be ${shouldHaveUsesVariablesProp} for fragment shader '${fragmentShader}'`,
-			);
-		}
-
-	}, [uniformEntries, showControls]);
 
 
 
@@ -319,6 +279,7 @@ export const WebGLShader = (
 
 
 
+	
 	return (
 		<div 
 			className={STYLES("canvasWrapper", { skew })} 

@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { DEFAULT_HEIGHT, SKEW_DEG } from "@/components/WebGLShader/constants";
+
 import { css } from "@emotion/css";
-import { SkeletonLoaderAnimation } from "@/components/WebGLShader/SkeletonLoaderAnimation";
-import { cssVariables } from "@/components/WebGLShader/utils/cssVariables";
+
+
+
 
 import { 
 	StyleOptions, 
@@ -17,7 +18,7 @@ import {
 function useCanvasHeightPlaceholderClassName(
 	minWidth: number | undefined
 ) {
-	const height = DEFAULT_HEIGHT;
+	const height = 250;
 	const maintainHeight = 0;
 
 
@@ -60,10 +61,10 @@ const styles = ({ styled, theme }: StyleOptions) => ({
 		max-width: 100%;
 
 		&--skew {
-			transform: skewY(-${SKEW_DEG}deg);
+			transform: skewY(-6deg);
 		}
 		&--hasWidth {
-			width: ${cssVariables.contentWidth}px;
+			width: 750px;
 			border-radius: 4px;
 		}
 	`,
@@ -77,7 +78,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
 		text-align: center;
 
 		&--skew {
-			transform: skewY(${SKEW_DEG}deg) skewX(-12deg);
+			transform: skewY(6deg) skewX(-12deg);
 		}
 	`,
 });
@@ -117,11 +118,9 @@ export const WebGLShaderSkeleton = (
 		>
 
 
-			<SkeletonLoaderAnimation>
-				<p className={s("loadingMessage", { skew })}>
-					Loading canvas...
-				</p>
-			</SkeletonLoaderAnimation>
+			<p className={s("loadingMessage", { skew })}>
+				Loading canvas...
+			</p>
 
 
 		</div>

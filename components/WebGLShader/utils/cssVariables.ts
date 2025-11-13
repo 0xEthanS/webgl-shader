@@ -2,26 +2,10 @@
 
 
 
-export const cssVariables = {
-	fontMonospace: "'Fira Code', monospace",
-	fontFamily: "'Fira Sans', sans-serif",
-	contentWidth: 750,
-	contentPadding: 24,
-	mobileWidth: 800,
-};
-
-
-
-
-const text400 = "#6691b5";
-
-
-
-
 export const colors = {
 	text: "#B9DBFA",
 	text200: "#486d8c",
-	text400,
+	text400: "#6691b5",
 	text700: "#99bad5",
 	text800: "#9fcff9",
 	blue: "#399ef4",
@@ -54,7 +38,7 @@ export const colors = {
 	blueRgb: "57, 157, 244",
 	commit: "#4f9fff",
 	command: "#21c5c7",
-	"cli-arg": text400,
+	"cli-arg": "#6691b5",
 
 	// Aliases
 	get string() {
