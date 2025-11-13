@@ -75,14 +75,20 @@ export const WebGLShaderLoader = (
 						w-screen 
 						my-10 
 						-mx-6 
-					`
+					`,
+					clsx(
+						{
+							"m-[calc(32px+min(100vw,750px)*0.04)_-24px_calc(48px+min(100vw,750px)": skew
+						}
+					)
 				)
 			} 
-			style={skew ? {
-				margin: 'calc(32px + min(100vw, 750px) * 0.04) -24px calc(48px + min(100vw, 750px) * 0.04)'
-			} : undefined}
 			ref={ref}
 		>
+
+
+
+
 			{visible ? (
 				(() => {
 					const WebGLShader = getWebGLShader();
@@ -104,6 +110,10 @@ export const WebGLShaderLoader = (
 					maintainHeight={maintainHeight}
 				/>
 			)}
+
+
+
+
 		</div>
 	);
 };
