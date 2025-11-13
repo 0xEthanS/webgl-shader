@@ -5,11 +5,8 @@ import { useRef } from "react";
 import { WebGLShaderSkeleton } from "@/components/WebGLShader/WebGLShaderSkeleton";
 import { useVisible } from "@/components/WebGLShader/utils/hooks/useVisible";
 
-
-import { 
-	StyleOptions, 
-	useStyles 
-} from "@/components/WebGLShader/utils/styles";
+import clsx from "clsx";
+import { cn } from "@/lib/utills/cn";
 
 
 
@@ -30,64 +27,6 @@ function getWebGLShader() {
 
 
 
-const styles = (
-	{ 
-		styled, 
-		theme 
-	}: StyleOptions
-) => ({
-	container: styled.css`
-		width: 100vw;
-		margin: 40px -24px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-
-		&--skew {
-			margin: calc(32px + min(100vw, 750px) * 0.04) -24px
-				calc(48px + min(100vw, 750px) * 0.04);
-		}
-	`,
-
-	colorButtonWrapper: styled.css`
-		margin-top: 40px;
-		padding: 0 24px;
-		display: flex;
-		gap: 24px;
-		flex-wrap: wrap;
-		justify-content: center;
-
-		&--skew {
-			transform: skewY(-6deg);
-		}
-
-		@media (max-width: 600px) {
-			margin-top: 32px;
-		}
-
-		@media (max-width: 450px) {
-			margin-top: 24px;
-		}
-	`,
-
-	colorButton: styled.css`
-		width: 64px;
-		height: 48px;
-		border-radius: 8px;
-		transition: outline 0.2s;
-		border: 3px solid ${theme.background};
-		outline: 0px solid ${theme.background};
-
-		&--skew {
-			transform: skewY(6deg) skewX(-12deg);
-		}
-
-		@media (max-width: 450px) {
-			width: 56px;
-		}
-	`,
-});
-
 
 
 
@@ -106,7 +45,7 @@ export const WebGLShaderLoader = (
 ) => {
 
 
-	const STYLES = useStyles(styles);
+	
 
 
 	const colorConfigurationArr = Array.isArray(colorConfiguration)
@@ -123,16 +62,25 @@ export const WebGLShaderLoader = (
 
 
 
+
+
 	return (
 		<div 
-			className={
-				[
-					STYLES(
-						"container", 
-						{ skew }), 
-						"canvas"
-				].join(" ")
+			className={cn(
+					"canvas", 
+					`
+						flex 
+						flex-col 
+						items-center 
+						w-screen 
+						my-10 
+						-mx-6 
+					`
+				)
 			} 
+			style={skew ? {
+				margin: 'calc(32px + min(100vw, 750px) * 0.04) -24px calc(48px + min(100vw, 750px) * 0.04)'
+			} : undefined}
 			ref={ref}
 		>
 			{visible ? (

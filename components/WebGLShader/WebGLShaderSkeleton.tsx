@@ -1,89 +1,7 @@
 import { useMemo } from "react";
-
+import clsx from "clsx";
+import { cn } from "@/lib/utills/cn";
 import { css } from "@emotion/css";
-
-
-
-
-import { 
-	StyleOptions, 
-	useStyles 
-} from "@/components/WebGLShader/utils/styles";
-
-
-
-
-
-
-function useCanvasHeightPlaceholderClassName(
-	minWidth: number | undefined
-) {
-	const height = 250;
-	const maintainHeight = 0;
-
-
-
-	return useMemo(() => {
-		const styled = { css };
-		const classNames = [
-			styled.css`
-				position: relative;
-				padding-top: ${height}px;
-				width: 100vw;
-			`,
-		];
-		if (typeof minWidth === "number") {
-			const heightProportion = height / minWidth;
-			classNames.push(styled.css`
-				@media (max-width: ${minWidth}px) {
-					padding-top: ${heightProportion * 100}vw !important;
-					padding-bottom: calc(
-						${height * maintainHeight}px - ${heightProportion * maintainHeight * 100}vw
-					);
-				}
-			`);
-		}
-		return classNames.join(" ");
-	}, [minWidth, height]);
-}
-
-
-
-
-
-
-
-
-const styles = ({ styled, theme }: StyleOptions) => ({
-	wrapper: styled.css`
-		overflow: hidden;
-		margin: 0px auto;
-		max-width: 100%;
-
-		&--skew {
-			transform: skewY(-6deg);
-		}
-		&--hasWidth {
-			width: 750px;
-			border-radius: 4px;
-		}
-	`,
-
-	loadingMessage: styled.css`
-		color: ${theme.text400};
-		margin: 0;
-		position: relative;
-		z-index: 3;
-		padding: 0 32px;
-		text-align: center;
-
-		&--skew {
-			transform: skewY(6deg) skewX(-12deg);
-		}
-	`,
-});
-
-
 
 
 
@@ -102,23 +20,44 @@ export const WebGLShaderSkeleton = (
 
 
 
-	const s = useStyles(styles);
 
-
-	const heightClassName = useCanvasHeightPlaceholderClassName(minWidth);
+	const heightClassName = useMemo(() => {
+		return css`
+			@media (max-width: ${minWidth}px) {
+				padding-top: ${(250 / minWidth!) * 100}vw !important;
+			}
+		`;
+	}, [minWidth]);
 
 
 	
 
 
+
 	return (
 		<div
-			className={[heightClassName, s("wrapper", { hasWidth, skew })].join(" ")}
+			className={cn(
+				heightClassName, 
+				clsx(
+					"relative w-screen overflow-hidden max-w-full my-0 mx-auto ",
+					{
+						"-skew-y-6": skew,
+    					"w-[750px] rounded": hasWidth
+					}
+				)
+			)}
+
 			data-maintain={maintainHeight}
 		>
 
 
-			<p className={s("loadingMessage", { skew })}>
+			<p className={clsx(
+					"w-screen relative m-0 pt-[250px] px-8 text-center z-30 text-slate-400",
+					{
+						"skew-y-6 -skew-x-12": skew
+					}
+				)}
+			>
 				Loading canvas...
 			</p>
 

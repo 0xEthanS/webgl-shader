@@ -1,7 +1,5 @@
 
 
-
-
 export const colors = {
 	text: "#B9DBFA",
 	text200: "#486d8c",

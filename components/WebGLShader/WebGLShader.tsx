@@ -1,27 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-
-import { 
-	StyleOptions, 
-	useStyles 
-} from "@/components/WebGLShader/utils/styles";
-
-
 import { useViewportWidth } from "@/components/WebGLShader/utils/hooks/useViewportWidth";
 import { fragmentShaderRegistry } from "@/components/WebGLShader/shaders/fragmentShaders";
 import { WebGLRenderer } from "@/components/WebGLShader/WebGLRenderer";
-
 
 import { 
 	ColorConfiguration, 
 	colorConfigurations 
 } from "@/components/WebGLShader/colorConfigurations";
 
-
 import { vertexShaderRegistry } from "@/components/WebGLShader/shaders/vertexShaders";
 
-
 import { FragmentShader } from "@/components/WebGLShader/shaders/types";
+
+import clsx from "clsx";
+import { cn } from "@/lib/utills/cn";
+
 
 
 
@@ -49,46 +43,6 @@ function calculateWebGLCanvasDimensions(
 
 	return [width, height];
 }
-
-
-
-
-
-
-const styles = ({ styled }: StyleOptions) => ({
-	canvasWrapper: styled.css`
-		position: relative;
-		max-width: 100%;
-
-		canvas {
-			position: absolute;
-			top: 0;
-			left: 0;
-		}
-
-		&--skew {
-			transform: skewY(-6deg);
-		}
-	`,
-
-	variables: styled.css`
-		position: relative;
-		z-index: 2;
-		display: flex;
-		gap: 32px;
-		align-items: flex-start;
-		padding-left: 24px;
-		padding-right: 24px;
-		padding-top: 20px;
-		height: 72px;
-		max-width: 100%;
-		box-sizing: border-box;
-
-		@media (max-width: 800px) {
-			padding-top: 40px;
-		}
-	`,
-});
 
 
 
@@ -156,9 +110,6 @@ export const WebGLShader = (
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
-
-
-	const STYLES = useStyles(styles);
 
 
 	const FRAGMENTSHADER = useFragmentShader(fragmentShader);
@@ -276,25 +227,37 @@ export const WebGLShader = (
 
 
 
-
-
-
 	
 	return (
 		<div 
-			className={STYLES("canvasWrapper", { skew })} 
+			className={clsx(
+				`
+					relative 
+					max-w-full 
+				`,
+				{
+					"-skew-y-6": skew
+				}
+			)
+				
+			} 
 			style={{ width }}
 		>
 
 
 
 
-			<div style={{ paddingTop: `${(HEIGHT / width) * 100}%` }} />
+			<div 
+				style={{ 
+					paddingTop: `${(HEIGHT / width) * 100}%` 
+				}} 
+			/>
 
 
 
 
 			<canvas
+				className="absolute top-0 left-0"
 				ref={canvasRef}
 				width={width}
 				height={HEIGHT}
