@@ -1,50 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-
-import { useViewportWidth } from "@/components/WebGLShader/utils/hooks/useViewportWidth";
 import { fragmentShaderRegistry } from "@/components/WebGLShader/shaders/fragmentShaders";
 import { WebGLRenderer } from "@/components/WebGLShader/WebGLRenderer";
-
 import { 
 	ColorConfiguration, 
 	colorConfigurations 
 } from "@/components/WebGLShader/colorConfigurations";
-
 import { vertexShaderRegistry } from "@/components/WebGLShader/shaders/vertexShaders";
-
 import { FragmentShader } from "@/components/WebGLShader/shaders/types";
-
 import clsx from "clsx";
-import { cn } from "@/lib/utills/cn";
-
-
-
-
-
-
-function calculateWebGLCanvasDimensions(
-	maintainHeight: number | undefined,
-	minWidth: number | undefined,
-	viewportWidth: number
-) {
-	let height = 250
-
-
-	const width = Math.max(minWidth!, Math.min(viewportWidth, viewportWidth))
-	
-
-
-
-
-	if (maintainHeight != null) {
-		const fac = (Math.max(1, width / viewportWidth) - 1) * maintainHeight;
-		height *= 1 + fac;
-	}
-	height = Math.round(height); // A fractional canvas height causes visual artifacts
-
-	return [width, height];
-}
-
-
 
 
 
@@ -55,7 +18,9 @@ interface FragmentShaderProps {
 }
 
 
-export interface WebGLShaderProps extends FragmentShaderProps {
+
+
+interface WebGLShaderProps extends FragmentShaderProps {
 	skew?: boolean;
 	colorConfiguration: ColorConfiguration;
 	width?: number;
@@ -71,21 +36,18 @@ export interface WebGLShaderProps extends FragmentShaderProps {
 
 
 
-
-
-function useFragmentShader(
-	fragmentShader: string
+function calculateWebGLCanvasDimensions(
+	maintainHeight: number | undefined,
+	minWidth: number | undefined,
+	viewportWidth: number
 ) {
-	const FRAGMENTSHADER = useMemo(() => {
-		const createFragmentShader = fragmentShaderRegistry[fragmentShader]!({});
-		return createFragmentShader as FragmentShader;
-	}, [fragmentShader]);
-	return FRAGMENTSHADER;
+	let height = 250
+	const width = Math.max(minWidth!, Math.min(viewportWidth, viewportWidth))
+	const fac = (Math.max(1, width / viewportWidth) - 1) * maintainHeight!;
+	height *= 1 + fac;
+	height = Math.round(height);
+	return [width, height];
 }
-
-
-
-
 
 
 
@@ -105,19 +67,19 @@ export const WebGLShader = (
 
 	const animate = true; 
 
-	const viewportWidth = useViewportWidth()!;
+	const [viewportWidth, setWidth] = useState(window.innerWidth);
+	useEffect(() => {
+		const listener = () => setWidth(window.innerWidth);
+		window.addEventListener("resize", listener);
+		return () => window.removeEventListener("resize", listener);
+	}, []);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
-
-
-
-	const FRAGMENTSHADER = useFragmentShader(fragmentShader);
-
-
-
-
-
+	const FRAGMENTSHADER = useMemo(() => {
+		const createFragmentShader = fragmentShaderRegistry[fragmentShader]!({});
+		return createFragmentShader as FragmentShader;
+	}, [fragmentShader]);
 
 	const [width, HEIGHT] = calculateWebGLCanvasDimensions(
 		maintainHeight, 
@@ -125,27 +87,16 @@ export const WebGLShader = (
 		viewportWidth
 	);
 
-
 	const idealScale = Math.min(1, viewportWidth / width);
-
 
 	const canvasScale = Math.ceil(HEIGHT * idealScale) / HEIGHT;
 
-
-
-
-
-
 	const [uniformValues] = useState(() => {
-
 		const values: Record<string, number> = {};
-
 		for (const [key, uniform] of Object.entries(FRAGMENTSHADER.uniforms)) {
 			values[key] = uniform.value;
 		}
-
 		return values;
-
 	});
 
 
@@ -156,11 +107,7 @@ export const WebGLShader = (
 		let resized = true;
 		let stop = false;
 		const canvas = canvasRef.current;
-
-
 		if (!canvas) return;
-
-
 		const renderer = new WebGLRenderer(
 			canvas,
 			vertexShaderRegistry.default!,
@@ -168,19 +115,12 @@ export const WebGLShader = (
 			colorConfigurations[colorConfiguration],
 			seed,
 		);
-
-
 		for (const [key, value] of Object.entries(uniformValues)) {
 			pendingUniformWrites.current.push([key, value]);
 		}
-
-
 		function tick() {
-
 			if (stop) return;
-
 			requestAnimationFrame(tick);
-
 			if (resized) {
 				const [width, height] = calculateWebGLCanvasDimensions(
 					maintainHeight, 
@@ -190,40 +130,20 @@ export const WebGLShader = (
 				renderer.setDimensions(width, height);
 				resized = false;
 			}
-
 			for (let [key, value] of pendingUniformWrites.current) {
 				renderer.setUniform(key, value);
 			}
-
 			pendingUniformWrites.current.length = 0;
-
 			renderer.render();
-
 		}
-
-
 		tick();
-
-
 		const resizeListener = () => (resized = true);
-
-
 		window.addEventListener("resize", resizeListener);
-
-
 		return () => {
 			stop = true;
 			window.removeEventListener("resize", resizeListener);
 		};
-		
-
 	}, [FRAGMENTSHADER, animate]);
-
-
-
-
-
-
 
 
 
@@ -231,10 +151,7 @@ export const WebGLShader = (
 	return (
 		<div 
 			className={clsx(
-				`
-					relative 
-					max-w-full 
-				`,
+				`relative max-w-full `,
 				{
 					"-skew-y-6": skew
 				}
@@ -243,19 +160,11 @@ export const WebGLShader = (
 			} 
 			style={{ width }}
 		>
-
-
-
-
 			<div 
 				style={{ 
 					paddingTop: `${(HEIGHT / width) * 100}%` 
 				}} 
 			/>
-
-
-
-
 			<canvas
 				className="absolute top-0 left-0"
 				ref={canvasRef}
@@ -266,10 +175,6 @@ export const WebGLShader = (
 					transformOrigin: "0 0",
 				}}
 			/>
-
-
-
-
 		</div>
 	);
 };
