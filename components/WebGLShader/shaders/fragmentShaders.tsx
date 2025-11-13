@@ -1,4 +1,10 @@
+
+
 import { CreateFragmentShader } from "@/components/WebGLShader/shaders/types";
+
+
+
+
 import final from "@/components/WebGLShader/shaders/fragment/final";
 import x_lerp from "@/components/WebGLShader/shaders/fragment/x_lerp";
 import x_sine_lerp from "@/components/WebGLShader/shaders/fragment/x_sine_lerp";
@@ -51,55 +57,61 @@ import final_effect_1 from "@/components/WebGLShader/shaders/fragment/final_effe
 
 
 
-export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader>> = {
-  final,
-  x_lerp,
-  x_sine_lerp,
-  x_sine_lerp_time,
-  single_color,
-  linear_gradient,
-  linear_gradient_area_under_line,
-  linear_gradient_area_under_slanted_line,
-  linear_gradient_area_under_exponential,
-  linear_gradient_area_under_wave,
-  wave_animated_0,
-  wave_animated_1,
-  wave_animated_blur_left_to_right,
-  wave_animated_blur_middle,
-  wave_animated_blur_down_even,
-  sine_stack_final,
-  sine_stack_decomposed,
-  sine_stack_composed,
-  sine_stack_0,
-  sine_stack_2,
-  sine_stack_3,
-  sine_stack_3_LSA,
-  simplex_wave,
-  simplex_stack_final,
-  simplex_stack_0,
-  simplex_stack_1,
-  multiple_waves,
-  simplex_noise,
-  simplex_perlin_split,
-  simplex_noise_stacked_0,
-  simplex_noise_stacked_1,
-  simplex_noise_stacked_2,
-  simplex_noise_stacked_3,
-  simplex_noise_stacked_4,
-  three_point_gradient,
-  rainbow,
-  read_texture,
 
-  read_texture_t,
-  multiple_waves_blur_0,
-  multiple_waves_blur_1,
-  multiple_waves_blur_2,
-  multiple_waves_blur_2_side_by_side,
-  multiple_waves_blur_3,
-  multiple_waves_blur_4,
-  final_effect_0,
-  final_effect_1,
+
+export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader>> = {
+	final,
+	x_lerp,
+	x_sine_lerp,
+	x_sine_lerp_time,
+	single_color,
+	linear_gradient,
+	linear_gradient_area_under_line,
+	linear_gradient_area_under_slanted_line,
+	linear_gradient_area_under_exponential,
+	linear_gradient_area_under_wave,
+	wave_animated_0,
+	wave_animated_1,
+	wave_animated_blur_left_to_right,
+	wave_animated_blur_middle,
+	wave_animated_blur_down_even,
+	sine_stack_final,
+	sine_stack_decomposed,
+	sine_stack_composed,
+	sine_stack_0,
+	sine_stack_2,
+	sine_stack_3,
+	sine_stack_3_LSA,
+	simplex_wave,
+	simplex_stack_final,
+	simplex_stack_0,
+	simplex_stack_1,
+	multiple_waves,
+	simplex_noise,
+	simplex_perlin_split,
+	simplex_noise_stacked_0,
+	simplex_noise_stacked_1,
+	simplex_noise_stacked_2,
+	simplex_noise_stacked_3,
+	simplex_noise_stacked_4,
+	three_point_gradient,
+	rainbow,
+	read_texture,
+
+	read_texture_t,
+	multiple_waves_blur_0,
+	multiple_waves_blur_1,
+	multiple_waves_blur_2,
+	multiple_waves_blur_2_side_by_side,
+	multiple_waves_blur_3,
+	multiple_waves_blur_4,
+	final_effect_0,
+	final_effect_1,
 };
+
+
+
+
 
 
 

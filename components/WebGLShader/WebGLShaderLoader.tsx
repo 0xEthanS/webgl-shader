@@ -1,29 +1,17 @@
 "use client"
 
 import dynamic from "next/dynamic";
-import { ComponentType, useRef, useState } from "react";
-
-import type { WebGLShaderProps } from "@/components/WebGLShader/WebGLShader";
-
-
-import { 
-	WebGLShaderSkeleton, 
-	WebGLShaderPropsContext 
-} from "@/components/WebGLShader/WebGLShaderSkeleton";
-
-
-
-
-import { 
-	ColorConfiguration, 
-	colorConfigurations 
-} from "@/components/WebGLShader/colorConfigurations";
-
-
-
-
+import { useRef } from "react";
+import { WebGLShaderSkeleton } from "@/components/WebGLShader/WebGLShaderSkeleton";
 import { useVisible } from "@/components/WebGLShader/utils/hooks/useVisible";
-import { StyleOptions, useStyles } from "@/components/WebGLShader/utils/styles";
+
+
+import { 
+	StyleOptions, 
+	useStyles 
+} from "@/components/WebGLShader/utils/styles";
+
+
 import { cssVariables } from "@/components/WebGLShader/utils/cssVariables";
 import { SKEW_DEG } from "@/components/WebGLShader/constants";
 
@@ -32,9 +20,7 @@ import { SKEW_DEG } from "@/components/WebGLShader/constants";
 
 
 
-let _WebGLShader: ComponentType<WebGLShaderProps> | null;
-
-
+let _WebGLShader
 
 
 function getWebGLShader() {
@@ -47,7 +33,14 @@ function getWebGLShader() {
 
 
 
-const styles = ({ styled, theme }: StyleOptions) => ({
+
+
+const styles = (
+	{ 
+		styled, 
+		theme 
+	}: StyleOptions
+) => ({
 	container: styled.css`
 		width: 100vw;
 		margin: 40px -${cssVariables.contentPadding}px;
@@ -103,25 +96,27 @@ const styles = ({ styled, theme }: StyleOptions) => ({
 
 
 
+
+
 export const WebGLShaderLoader = (
-	props: Omit<WebGLShaderProps, "colorConfiguration"> & {
-		colorConfiguration?: ColorConfiguration | ColorConfiguration[];
-	},
+	{
+		colorConfiguration, 
+		fragmentShader, 
+		height, 
+		maintainHeight, 
+		minWidth, 
+		seed, 
+		skew 
+	}:any
 ) => {
 
 
-	const { skew } = props;
+	const STYLES = useStyles(styles);
 
 
-	const s = useStyles(styles);
-
-
-	const colorConfigurationArr = Array.isArray(props.colorConfiguration)
-		? props.colorConfiguration
-		: [props.colorConfiguration ?? "default"];
-
-
-	const [colorConfiguration, setColorConfiguration] = useState(colorConfigurationArr[0]);
+	const colorConfigurationArr = Array.isArray(colorConfiguration)
+		? colorConfiguration
+		: [colorConfiguration ?? "default"];
 
 
 	const ref = useRef<HTMLDivElement>(null!);
@@ -130,72 +125,42 @@ export const WebGLShaderLoader = (
 	const visible = useVisible(ref, "64px");
 
 
-	let content: React.ReactNode;
-
-
-	if (visible) {
-
-		const WebGLShader = getWebGLShader();
-
-		content = <WebGLShader {...props} colorConfiguration={colorConfiguration} />;
-
-	} else {
-		content = <WebGLShaderSkeleton />;
-	}
-
 
 
 
 	return (
-		<div className={[s("container", { skew }), "canvas"].join(" ")} ref={ref}>
-
-
-
-
-			<WebGLShaderPropsContext.Provider value={props}>
-				{content}
-			</WebGLShaderPropsContext.Provider>
-
-
-
-
-			{colorConfigurationArr.length > 1 && (
-				<div className={s(
-						"colorButtonWrapper", 
-						{ skew }
-					)}
-				>
-					{colorConfigurationArr.map((key) => {
-
-
-						const gradient = colorConfigurations[key].gradient;
-
-
-						const selected = key === colorConfiguration;
-
-
-						return (
-							<button
-								className={s("colorButton", { skew })}
-								key={key}
-								style={{
-									background: gradientToThreeStopGradient(gradient),
-									outline: selected
-										? `5px solid ${gradient[Math.floor(gradient.length / 2)]}`
-										: undefined,
-								}}
-								onClick={() => setColorConfiguration(key)}
-							/>
-						);
-
-
-					})}
-				</div>
+		<div 
+			className={
+				[
+					STYLES(
+						"container", 
+						{ skew }), 
+						"canvas"
+				].join(" ")
+			} 
+			ref={ref}
+		>
+			{visible ? (
+				(() => {
+					const WebGLShader = getWebGLShader();
+					return (
+						<WebGLShader 
+							colorConfiguration={colorConfigurationArr[0]} 
+							fragmentShader={fragmentShader}
+							height={height}
+							maintainHeight={maintainHeight} 
+							minWidth={minWidth} 
+							seed={seed} 
+							skew={skew}
+						/>
+					);
+				})()
+			) : (
+				<WebGLShaderSkeleton 
+					minWidth={minWidth}
+					maintainHeight={maintainHeight}
+				/>
 			)}
-
-
-
-
 		</div>
 	);
 };
@@ -203,20 +168,8 @@ export const WebGLShaderLoader = (
 
 
 
-function gradientToThreeStopGradient(gradient: string[]) {
-	const [a, b, c] = pick3(gradient);
-	return `linear-gradient(90deg, ${a} 0%, ${a} 33.2%, ${b} 33.3%, ${b} 66.5%, ${c} 66.6%, ${c} 100%)`;
-}
 
 
-
-
-function pick3<T>(arr: T[]): T[] {
-	const N = arr.length;
-	if (N < 3) throw new Error("Array must have at least 3 elements");
-	if (N === 3) return arr;
-	return [0.25, 0.5, 0.75].map((t) => arr[Math.floor((N - 1) * t)]);
-}
 
 
 

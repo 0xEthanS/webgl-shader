@@ -1,10 +1,13 @@
-import { createContext, useContext, useMemo } from "react";
-import { WebGLShaderProps } from "@/components/WebGLShader/WebGLShader";
-import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "@/components/WebGLShader/constants";
+import { useMemo } from "react";
+import { DEFAULT_HEIGHT, SKEW_DEG } from "@/components/WebGLShader/constants";
 import { css } from "@emotion/css";
 import { SkeletonLoaderAnimation } from "@/components/WebGLShader/SkeletonLoaderAnimation";
 import { cssVariables } from "@/components/WebGLShader/utils/cssVariables";
-import { StyleOptions, useStyles } from "@/components/WebGLShader/utils/styles";
+
+import { 
+	StyleOptions, 
+	useStyles 
+} from "@/components/WebGLShader/utils/styles";
 
 
 
@@ -12,10 +15,12 @@ import { StyleOptions, useStyles } from "@/components/WebGLShader/utils/styles";
 
 
 function useCanvasHeightPlaceholderClassName(
-	props: Pick<WebGLShaderProps, "height" | "maintainHeight" | "width" | "minWidth" | "skew">,
+	minWidth: number | undefined
 ) {
-	const { height = DEFAULT_HEIGHT, maintainHeight = 0 } = props;
-	const width = props.minWidth ?? props.width;
+	const height = DEFAULT_HEIGHT;
+	const maintainHeight = 0;
+
+
 
 	return useMemo(() => {
 		const styled = { css };
@@ -26,10 +31,10 @@ function useCanvasHeightPlaceholderClassName(
 				width: 100vw;
 			`,
 		];
-		if (typeof width === "number") {
-			const heightProportion = height / width;
+		if (typeof minWidth === "number") {
+			const heightProportion = height / minWidth;
 			classNames.push(styled.css`
-				@media (max-width: ${width}px) {
+				@media (max-width: ${minWidth}px) {
 					padding-top: ${heightProportion * 100}vw !important;
 					padding-bottom: calc(
 						${height * maintainHeight}px - ${heightProportion * maintainHeight * 100}vw
@@ -38,15 +43,12 @@ function useCanvasHeightPlaceholderClassName(
 			`);
 		}
 		return classNames.join(" ");
-	}, [width, height]);
+	}, [minWidth, height]);
 }
 
 
 
 
-export const WebGLShaderPropsContext = createContext<Omit<WebGLShaderProps, "colorConfiguration">>(
-	null!,
-);
 
 
 
@@ -83,30 +85,52 @@ const styles = ({ styled, theme }: StyleOptions) => ({
 
 
 
-export const WebGLShaderSkeleton = () => {
-	const props = useContext(WebGLShaderPropsContext);
-	const s = useStyles(styles);
-	const heightClassName = useCanvasHeightPlaceholderClassName(props);
 
-	const { skew = false, showControls = true } = props;
-	const hasWidth = typeof props.width === "number";
+
+
+
+export const WebGLShaderSkeleton = (
+	{
+		minWidth, 
+		maintainHeight
+	}:any
+) => {
+
+	const skew = false;
+	const hasWidth = false; 
+
+
+
+	const s = useStyles(styles);
+
+
+	const heightClassName = useCanvasHeightPlaceholderClassName(minWidth);
+
+
+	
+
 
 	return (
-		<>
-			<div
-				className={[heightClassName, s("wrapper", { hasWidth, skew })].join(" ")}
-				data-maintain={props.maintainHeight}
-			>
-				<SkeletonLoaderAnimation>
-					<p className={s("loadingMessage", { skew })}>Loading canvas...</p>
-				</SkeletonLoaderAnimation>
-			</div>
-			{showControls && props.usesVariables && (
-				<div style={{ paddingBottom: `${CONTROLS_HEIGHT}px` }} />
-			)}
-		</>
+		<div
+			className={[heightClassName, s("wrapper", { hasWidth, skew })].join(" ")}
+			data-maintain={maintainHeight}
+		>
+
+
+			<SkeletonLoaderAnimation>
+				<p className={s("loadingMessage", { skew })}>
+					Loading canvas...
+				</p>
+			</SkeletonLoaderAnimation>
+
+
+		</div>
 	);
 };
+
+
+
+
 
 
 
