@@ -93,30 +93,6 @@ export class WebGLRenderer {
 
 
 
-	public setColorConfig(colorConfig: ColorConfiguration) {
-		const { gl } = this;
-		WebGLRenderer.writeGradientToTexture(gl, colorConfig.gradient, this.gradientTexture, 1000, 2);
-	}
-
-
-
-
-	public getSeed() {
-		const state = this.timeStates[0];
-		return state.seed;
-	}
-
-
-
-
-	public getTime() {
-		const state = this.timeStates[0];
-		return state.elapsed / 1000;
-	}
-
-
-
-
 	public render() {
 		const { gl } = this;
 		const now = Date.now();
@@ -140,10 +116,11 @@ export class WebGLRenderer {
 		gl.uniform1i(this.getUniformLocation("u_gradient"), 0);
 
 		// Clear canvas
-		this.clear();
+		gl.clearColor(0, 0, 0, 0);
+		gl.clear(gl.COLOR_BUFFER_BIT);
 
 		// Draw 2 triangles forming quad
-		gl.vertexAttribPointer(this.a_position, /* vec2 */ 2, gl.FLOAT, false, 0, 0);
+		gl.vertexAttribPointer(this.a_position, 2, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.a_position);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 		gl.drawArrays(gl.TRIANGLES, 0, this.positions().length / 2);
@@ -157,18 +134,10 @@ export class WebGLRenderer {
 		if (timeKeyMatch) {
 			const numString = timeKeyMatch.groups?.num;
 			const index = numString ? Number(numString) - 1 : 0;
-			// The special key "time" controls the renderer time speed
-			this.setTimeSpeed(index, value);
+			this.timeStates[index].timeSpeed = value;
 			return;
 		}
 		this.gl.uniform1f(this.getUniformLocation(key), value);
-	}
-
-
-
-
-	public setTimeSpeed(index: number, value: number) {
-		this.timeStates[index].timeSpeed = value;
 	}
 
 
@@ -207,15 +176,6 @@ export class WebGLRenderer {
 			0, 0,   1, 0,   0, 1, // Top-left triangle
 			1, 1,   1, 0,   0, 1, // Bottom-right triangle
 		];
-	}
-
-
-
-
-	private clear() {
-		const { gl } = this;
-		gl.clearColor(0, 0, 0, 0);
-		gl.clear(gl.COLOR_BUFFER_BIT);
 	}
 
 

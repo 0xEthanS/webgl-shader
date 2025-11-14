@@ -1,180 +1,154 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+"use client"
+
+import { useEffect, useRef, useState, useCallback } from "react";
 import { fragmentShaderRegistry } from "@/components/WebGLShader/shaders/fragmentShaders";
 import { WebGLRenderer } from "@/components/WebGLShader/WebGLRenderer";
-import { 
-	ColorConfiguration, 
-	colorConfigurations 
-} from "@/components/WebGLShader/colorConfigurations";
+import { colorConfigurations } from "@/components/WebGLShader/colorConfigurations";
 import { vertexShaderRegistry } from "@/components/WebGLShader/shaders/vertexShaders";
 import { FragmentShader } from "@/components/WebGLShader/shaders/types";
-import clsx from "clsx";
 
 
 
 
-interface FragmentShaderProps {
-	fragmentShader: string;
-	fragmentShaderOptions?: Partial<Record<string, unknown>>;
-}
+
+
+export const WebGLShader = ({ isPaused }: { isPaused: boolean }) => {
+
+
+	const colorConfiguration = "default";
+	const seed = 16192;
+	const fragmentShader = fragmentShaderRegistry["final"]!({}) as FragmentShader;
 
 
 
-
-interface WebGLShaderProps extends FragmentShaderProps {
-	skew?: boolean;
-	colorConfiguration: ColorConfiguration;
-	width?: number;
-	minWidth?: number;
-	maintainHeight?: number;
-	height?: number;
-	showControls?: boolean;
-	animate?: boolean;
-	seed?: number;
-	usesVariables?: boolean;
-}
-
-
-
-
-function calculateWebGLCanvasDimensions(
-	maintainHeight: number | undefined,
-	minWidth: number | undefined,
-	viewportWidth: number
-) {
-	let height = 250
-	const width = Math.max(minWidth!, Math.min(viewportWidth, viewportWidth))
-	const fac = (Math.max(1, width / viewportWidth) - 1) * maintainHeight!;
-	height *= 1 + fac;
-	height = Math.round(height);
-	return [width, height];
-}
-
-
-
-
-export const WebGLShader = (
-	{
-		colorConfiguration, 
-		fragmentShader, 
-		height, 
-		maintainHeight, 
-		minWidth, 
-		seed, 
-		skew 
-	}:WebGLShaderProps 
-) => {
-
-
-	const animate = true; 
-
-	const [viewportWidth, setWidth] = useState(window.innerWidth);
-	useEffect(() => {
-		const listener = () => setWidth(window.innerWidth);
-		window.addEventListener("resize", listener);
-		return () => window.removeEventListener("resize", listener);
-	}, []);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const rendererRef = useRef<WebGLRenderer | null>(null);
+	const animationFrameRef = useRef<number | undefined>(undefined);
 
-	const FRAGMENTSHADER = useMemo(() => {
-		const createFragmentShader = fragmentShaderRegistry[fragmentShader]!({});
-		return createFragmentShader as FragmentShader;
-	}, [fragmentShader]);
+	const [dimensions, setDimensions] = useState({ width: 1, height: 1 });
 
-	const [width, HEIGHT] = calculateWebGLCanvasDimensions(
-		maintainHeight, 
-		minWidth, 
-		viewportWidth
-	);
-
-	const idealScale = Math.min(1, viewportWidth / width);
-
-	const canvasScale = Math.ceil(HEIGHT * idealScale) / HEIGHT;
-
-	const [uniformValues] = useState(() => {
-		const values: Record<string, number> = {};
-		for (const [key, uniform] of Object.entries(FRAGMENTSHADER.uniforms)) {
-			values[key] = uniform.value;
-		}
-		return values;
-	});
+	const uniformValues: Record<string, number> = {};
 
 
-	const pendingUniformWrites = useRef<[string, number][]>([]);
+	for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
+		uniformValues[key] = uniform.value;
+	}
+
+
+	const updateDimensions = useCallback(() => {
+		if (!containerRef.current) return;
+		const width = containerRef.current.clientWidth;
+		const height = containerRef.current.clientHeight;
+		setDimensions(prev => {
+			if (prev.width === width && prev.height === height) {
+				return prev;
+			}
+			return { width, height };
+		});
+	}, []);
 
 
 	useEffect(() => {
-		let resized = true;
-		let stop = false;
-		const canvas = canvasRef.current;
-		if (!canvas) return;
-		const renderer = new WebGLRenderer(
-			canvas,
-			vertexShaderRegistry.default!,
-			FRAGMENTSHADER.shader,
-			colorConfigurations[colorConfiguration],
-			seed,
-		);
-		for (const [key, value] of Object.entries(uniformValues)) {
-			pendingUniformWrites.current.push([key, value]);
-		}
-		function tick() {
-			if (stop) return;
-			requestAnimationFrame(tick);
-			if (resized) {
-				const [width, height] = calculateWebGLCanvasDimensions(
-					maintainHeight, 
-					minWidth, 
-					window.innerWidth
-				);
-				renderer.setDimensions(width, height);
-				resized = false;
-			}
-			for (let [key, value] of pendingUniformWrites.current) {
-				renderer.setUniform(key, value);
-			}
-			pendingUniformWrites.current.length = 0;
-			renderer.render();
-		}
-		tick();
-		const resizeListener = () => (resized = true);
-		window.addEventListener("resize", resizeListener);
+		if (!containerRef.current) return;
+		const resizeObserver = new ResizeObserver(updateDimensions);
+		resizeObserver.observe(containerRef.current);
+		updateDimensions();
 		return () => {
-			stop = true;
-			window.removeEventListener("resize", resizeListener);
+			resizeObserver.disconnect();
 		};
-	}, [FRAGMENTSHADER, animate]);
+	}, [updateDimensions]);
+
+
+	useEffect(() => {
+		const canvas = canvasRef.current;
+
+		if (!canvas) return;
+
+
+		if (!rendererRef.current) {
+			rendererRef.current = new WebGLRenderer(
+				canvas,
+				vertexShaderRegistry.default!,
+				fragmentShader.shader,
+				colorConfigurations[colorConfiguration],
+				seed,
+			);
+			for (const [key, value] of Object.entries(uniformValues)) {
+				rendererRef.current.setUniform(key, value);
+			}
+		}
+
+
+		const renderer = rendererRef.current;
+		const { width, height } = dimensions;
+
+		canvas.width = width;
+		canvas.height = height;
+
+		canvas.style.width = `${width}px`;
+		canvas.style.height = `${height}px`;
+
+		renderer.setDimensions(width, height);
+
+
+		const animate = () => {
+			if (!isPaused && renderer) {
+				renderer.render();
+				animationFrameRef.current = requestAnimationFrame(animate);
+			}
+		};
+
+
+		if (!isPaused) {
+			animate();
+		}
+
+
+		return () => {
+			if (animationFrameRef.current) {
+				cancelAnimationFrame(animationFrameRef.current);
+			}
+		};
+
+	}, [dimensions, isPaused, fragmentShader, colorConfiguration, uniformValues]);
 
 
 
-	
+
 	return (
-		<div 
-			className={clsx(
-				`relative max-w-full `,
-				{
-					"-skew-y-6": skew
-				}
-			)
-				
-			} 
-			style={{ width }}
+		<div className="
+				relative 
+				w-full 
+				-skew-y-6 
+				h-[250px] 
+				max-h-[250px] 
+
+				bg-emerald-300 
+			"
 		>
 			<div 
-				style={{ 
-					paddingTop: `${(HEIGHT / width) * 100}%` 
-				}} 
-			/>
-			<canvas
-				className="absolute top-0 left-0"
-				ref={canvasRef}
-				width={width}
-				height={HEIGHT}
-				style={{
-					transform: `scale(${canvasScale})`,
-					transformOrigin: "0 0",
-				}}
-			/>
+				ref={containerRef}
+				className="
+					absolute 
+					inset-0 
+					w-full 
+					h-full 
+				"
+			>
+				<canvas
+					ref={canvasRef}
+					className="
+						absolute 
+						top-0 
+						left-0 
+						w-full 
+						h-full 
+						[image-rendering:pixelated] 
+					"
+				/>
+			</div>
 		</div>
 	);
 };
