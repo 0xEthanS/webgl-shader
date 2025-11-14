@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { fragmentShaderRegistry } from "@/components/WebGLShader/shaders/fragmentShaders";
 import { WebGLRenderer } from "@/components/WebGLShader/WebGLRenderer";
 import { colorConfigurations } from "@/components/WebGLShader/colorConfigurations";
@@ -8,19 +8,21 @@ import { vertexShaderRegistry } from "@/components/WebGLShader/shaders/vertexSha
 import { FragmentShader } from "@/components/WebGLShader/shaders/types";
 
 
-
-
-
-
-export const WebGLShader = ({ isPaused }: { isPaused: boolean }) => {
-
+export const WebGLShader = (
+	{ 
+		isPaused 
+	}: { 
+		isPaused: boolean 
+	}
+) => {
 
 	const colorConfiguration = "default";
 	const seed = 16192;
-	const fragmentShader = fragmentShaderRegistry["final"]!({}) as FragmentShader;
-
-
-
+	
+	// Memoize fragmentShader to prevent recreation on every render
+	const fragmentShader = useMemo(() => 
+		fragmentShaderRegistry["final"]!({}) as FragmentShader
+	, []);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -29,13 +31,14 @@ export const WebGLShader = ({ isPaused }: { isPaused: boolean }) => {
 
 	const [dimensions, setDimensions] = useState({ width: 1, height: 1 });
 
-	const uniformValues: Record<string, number> = {};
-
-
-	for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
-		uniformValues[key] = uniform.value;
-	}
-
+	// Memoize uniformValues to prevent recreation on every render
+	const uniformValues = useMemo(() => {
+		const values: Record<string, number> = {};
+		for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
+			values[key] = uniform.value;
+		}
+		return values;
+	}, [fragmentShader.uniforms]);
 
 	const updateDimensions = useCallback(() => {
 		if (!containerRef.current) return;
@@ -49,7 +52,6 @@ export const WebGLShader = ({ isPaused }: { isPaused: boolean }) => {
 		});
 	}, []);
 
-
 	useEffect(() => {
 		if (!containerRef.current) return;
 		const resizeObserver = new ResizeObserver(updateDimensions);
@@ -61,11 +63,16 @@ export const WebGLShader = ({ isPaused }: { isPaused: boolean }) => {
 	}, [updateDimensions]);
 
 
+
+
+
+
+
+
+	// Separate effect for WebGL initialization and cleanup
 	useEffect(() => {
 		const canvas = canvasRef.current;
-
 		if (!canvas) return;
-
 
 		if (!rendererRef.current) {
 			rendererRef.current = new WebGLRenderer(
@@ -80,19 +87,52 @@ export const WebGLShader = ({ isPaused }: { isPaused: boolean }) => {
 			}
 		}
 
+		// Cleanup function with proper WebGL resource disposal
+		return () => {
+			if (rendererRef.current) {
+				const renderer = rendererRef.current as any;
+				if (renderer.gl) {
+					// Delete WebGL resources
+					if (renderer.program) {
+						renderer.gl.deleteProgram(renderer.program);
+					}
+					if (renderer.positionBuffer) {
+						renderer.gl.deleteBuffer(renderer.positionBuffer);
+					}
+					if (renderer.gradientTexture) {
+						renderer.gl.deleteTexture(renderer.gradientTexture);
+					}
+				}
+				rendererRef.current = null;
+			}
+		};
+	}, [fragmentShader, colorConfiguration, uniformValues, seed]);
 
-		const renderer = rendererRef.current;
+
+
+
+
+	// Separate effect for dimension updates
+	useEffect(() => {
+		if (!canvasRef.current || !rendererRef.current) return;
+		
 		const { width, height } = dimensions;
-
+		const canvas = canvasRef.current;
+		
 		canvas.width = width;
 		canvas.height = height;
-
 		canvas.style.width = `${width}px`;
 		canvas.style.height = `${height}px`;
+		
+		rendererRef.current.setDimensions(width, height);
+	}, [dimensions]);
 
-		renderer.setDimensions(width, height);
+	// Separate effect for animation control
+	useEffect(() => {
+		if (!rendererRef.current) return;
 
-
+		const renderer = rendererRef.current;
+		
 		const animate = () => {
 			if (!isPaused && renderer) {
 				renderer.render();
@@ -100,22 +140,23 @@ export const WebGLShader = ({ isPaused }: { isPaused: boolean }) => {
 			}
 		};
 
+		// Cancel any existing animation frame before starting new one
+		if (animationFrameRef.current) {
+			cancelAnimationFrame(animationFrameRef.current);
+			animationFrameRef.current = undefined;
+		}
 
 		if (!isPaused) {
 			animate();
 		}
 
-
 		return () => {
 			if (animationFrameRef.current) {
 				cancelAnimationFrame(animationFrameRef.current);
+				animationFrameRef.current = undefined;
 			}
 		};
-
-	}, [dimensions, isPaused, fragmentShader, colorConfiguration, uniformValues]);
-
-
-
+	}, [isPaused]);
 
 	return (
 		<div className="
@@ -152,10 +193,6 @@ export const WebGLShader = ({ isPaused }: { isPaused: boolean }) => {
 		</div>
 	);
 };
-
-
-
-
 
 
 
