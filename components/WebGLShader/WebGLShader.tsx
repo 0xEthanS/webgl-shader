@@ -18,8 +18,7 @@ export const WebGLShader = (
 
 	const colorConfiguration = "default";
 	const seed = 16192;
-	
-	// Memoize fragmentShader to prevent recreation on every render
+
 	const fragmentShader = useMemo(() => 
 		fragmentShaderRegistry["final"]!({}) as FragmentShader
 	, []);
@@ -31,7 +30,7 @@ export const WebGLShader = (
 
 	const [dimensions, setDimensions] = useState({ width: 1, height: 1 });
 
-	// Memoize uniformValues to prevent recreation on every render
+
 	const uniformValues = useMemo(() => {
 		const values: Record<string, number> = {};
 		for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
@@ -39,6 +38,7 @@ export const WebGLShader = (
 		}
 		return values;
 	}, [fragmentShader.uniforms]);
+
 
 	const updateDimensions = useCallback(() => {
 		if (!containerRef.current) return;
@@ -52,6 +52,7 @@ export const WebGLShader = (
 		});
 	}, []);
 
+
 	useEffect(() => {
 		if (!containerRef.current) return;
 		const resizeObserver = new ResizeObserver(updateDimensions);
@@ -63,13 +64,6 @@ export const WebGLShader = (
 	}, [updateDimensions]);
 
 
-
-
-
-
-
-
-	// Separate effect for WebGL initialization and cleanup
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
@@ -109,10 +103,6 @@ export const WebGLShader = (
 	}, [fragmentShader, colorConfiguration, uniformValues, seed]);
 
 
-
-
-
-	// Separate effect for dimension updates
 	useEffect(() => {
 		if (!canvasRef.current || !rendererRef.current) return;
 		
@@ -127,7 +117,7 @@ export const WebGLShader = (
 		rendererRef.current.setDimensions(width, height);
 	}, [dimensions]);
 
-	// Separate effect for animation control
+
 	useEffect(() => {
 		if (!rendererRef.current) return;
 
@@ -158,17 +148,11 @@ export const WebGLShader = (
 		};
 	}, [isPaused]);
 
-	return (
-		<div className="
-				relative 
-				w-full 
-				-skew-y-6 
-				h-[250px] 
-				max-h-[250px] 
 
-				bg-emerald-300 
-			"
-		>
+
+
+	return (
+
 			<div 
 				ref={containerRef}
 				className="
@@ -190,7 +174,6 @@ export const WebGLShader = (
 					"
 				/>
 			</div>
-		</div>
 	);
 };
 
