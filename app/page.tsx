@@ -1,4 +1,4 @@
-import { WebGLShaderLoader } from "@/components/WebGLShader/WebGLShaderLoader";
+import { WebGLShader } from "@/components/WebGLShader/WebGLShader";
 
 
 
@@ -23,7 +23,7 @@ export default function Home() {
 		>
 
 
-			<WebGLShaderLoader />
+			<WebGLShader />
 
 
 		</div>
