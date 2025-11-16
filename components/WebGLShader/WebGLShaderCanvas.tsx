@@ -3,26 +3,31 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { fragmentShaderRegistry } from "@/components/WebGLShader/shaders/fragmentShaders";
 import { WebGLRenderer } from "@/components/WebGLShader/WebGLRenderer";
-import { colorConfigurations } from "@/components/WebGLShader/colorConfigurations";
+import { colorConfigurations, ColorConfiguration } from "@/components/WebGLShader/colorConfigurations";
 import { vertexShaderRegistry } from "@/components/WebGLShader/shaders/vertexShaders";
 import { FragmentShader } from "@/components/WebGLShader/shaders/types";
 
 
+
+
+
+
 export const WebGLShaderCanvas = (
 	{ 
-		isPaused 
+		isPaused, 
+		colorConfiguration, 
+		fragmentShaderValue, 
+		seed
 	}: { 
-		isPaused: boolean 
+		isPaused: boolean; 
+		colorConfiguration: ColorConfiguration;
+		fragmentShaderValue: string;
+		seed: number; 
 	}
 ) => {
-
-	const colorConfiguration = "default";
-	const seed = 16192;
-
 	const fragmentShader = useMemo(() => 
-		fragmentShaderRegistry["final"]!({}) as FragmentShader
-	, []);
-
+		fragmentShaderRegistry[fragmentShaderValue]!({}) as FragmentShader
+	, [fragmentShaderValue]); 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const rendererRef = useRef<WebGLRenderer | null>(null);
@@ -64,9 +69,20 @@ export const WebGLShaderCanvas = (
 	}, [updateDimensions]);
 
 
+
+
+
+
+
+
 	useEffect(() => {
+
+
 		const canvas = canvasRef.current;
+
+
 		if (!canvas) return;
+
 
 		if (!rendererRef.current) {
 			rendererRef.current = new WebGLRenderer(
@@ -80,6 +96,7 @@ export const WebGLShaderCanvas = (
 				rendererRef.current.setUniform(key, value);
 			}
 		}
+
 
 		// Cleanup function with proper WebGL resource disposal
 		return () => {
@@ -100,7 +117,15 @@ export const WebGLShaderCanvas = (
 				rendererRef.current = null;
 			}
 		};
+
+
 	}, [fragmentShader, colorConfiguration, uniformValues, seed]);
+
+
+
+
+
+
 
 
 	useEffect(() => {
@@ -118,27 +143,27 @@ export const WebGLShaderCanvas = (
 	}, [dimensions]);
 
 
+
+
+	const isPausedRef = useRef(isPaused);
+
+	useEffect(() => {
+		isPausedRef.current = isPaused;
+	}, [isPaused]);
+
 	useEffect(() => {
 		if (!rendererRef.current) return;
 
 		const renderer = rendererRef.current;
 		
 		const animate = () => {
-			if (!isPaused && renderer) {
-				renderer.render();
-				animationFrameRef.current = requestAnimationFrame(animate);
+			if (!isPausedRef.current) {
+				renderer.render();  // Only render when not paused
 			}
+			animationFrameRef.current = requestAnimationFrame(animate);  // Always continue loop
 		};
 
-		// Cancel any existing animation frame before starting new one
-		if (animationFrameRef.current) {
-			cancelAnimationFrame(animationFrameRef.current);
-			animationFrameRef.current = undefined;
-		}
-
-		if (!isPaused) {
-			animate();
-		}
+		animate();
 
 		return () => {
 			if (animationFrameRef.current) {
@@ -146,36 +171,23 @@ export const WebGLShaderCanvas = (
 				animationFrameRef.current = undefined;
 			}
 		};
-	}, [isPaused]);
+	}, []); // Only run once
+
+
 
 
 
 
 	return (
-
-			<div 
-				ref={containerRef}
-				className="
-					absolute 
-					inset-0 
-					w-full 
-					h-full 
-				"
-			>
-				<canvas
-					ref={canvasRef}
-					className="
-						absolute 
-						top-0 
-						left-0 
-						w-full 
-						h-full 
-						[image-rendering:pixelated] 
-					"
-				/>
-			</div>
+		<div ref={containerRef} className="absolute inset-0 w-full h-full">
+			<canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full [image-rendering:pixelated]" />
+		</div>
 	);
 };
+
+
+
+
 
 
 

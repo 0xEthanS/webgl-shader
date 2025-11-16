@@ -15,15 +15,19 @@ export default function Home() {
 				pl-[max(env(safe-area-inset-left),24px)] 
 				mx-auto 
 				mt-10 
-				rounded-md 
+				rounded-xl 
 				overflow-hidden 
 
-				bg-orange-300 
+				bg-slate-300
 			"
 		>
 
 
-			<WebGLShader />
+			<WebGLShader 
+				colorConfiguration={"default"} // color definition
+				fragmentShaderValue={"final"} // shader shape
+				seed={16192} 
+			/>
 
 
 		</div>

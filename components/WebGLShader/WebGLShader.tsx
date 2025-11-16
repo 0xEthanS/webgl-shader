@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
+import { ColorConfiguration } from "@/components/WebGLShader/colorConfigurations";
 
 
 const WebGLShaderCanvas = dynamic(
@@ -38,7 +39,26 @@ function useVisible(ref: React.RefObject<HTMLElement>) {
 }
 
 
-export const WebGLShader = () => {
+
+
+
+
+
+
+export const WebGLShader = (
+	{ 
+		colorConfiguration, 
+		fragmentShaderValue, 
+		seed
+	}: { 
+		colorConfiguration: ColorConfiguration; 
+		fragmentShaderValue: string; 
+		seed: number
+	}
+) => {
+
+
+
 	const ref = useRef<HTMLDivElement>(null!);
 	const [hasBeenVisible, setHasBeenVisible] = useState(false);
 	const visible = useVisible(ref);
@@ -51,7 +71,22 @@ export const WebGLShader = () => {
 
 	return (
 		<div ref={ref}>
-			{hasBeenVisible && <WebGLShaderCanvas isPaused={!visible} />}
+			{hasBeenVisible && 
+
+
+
+
+				<WebGLShaderCanvas 
+					isPaused={!visible} 
+					colorConfiguration={colorConfiguration} 
+					fragmentShaderValue={fragmentShaderValue} 
+					seed={seed} 
+				/>
+
+
+
+
+			}
 		</div>
 	);
 };

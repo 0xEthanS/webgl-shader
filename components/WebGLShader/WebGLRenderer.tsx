@@ -35,25 +35,12 @@ interface ColorConfiguration {
 
 export class WebGLRenderer {
 
-
 	private timeStates: TimeState[];
-
-
 	private gl: WebGLRenderingContext;
-
-
 	private program: WebGLProgram;
-
-
 	private positionBuffer: WebGLBuffer | null;
-
-
 	private gradientTexture: WebGLTexture | null;
-
-
 	private a_position: number;
-
-
 	private uniformLocations = new Map<string, WebGLUniformLocation | null>();
 
 
