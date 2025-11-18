@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { fragmentShaderRegistry } from "@/components/WebGLShader/shaders/fragmentShaders";
 import { WebGLRenderer } from "@/components/WebGLShader/WebGLRenderer";
-import { colorConfigurations, ColorConfiguration } from "@/components/WebGLShader/colorConfigurations";
+import { 
+	colorConfigurations, 
+	ColorConfiguration 
+} from "@/components/WebGLShader/colorConfigurations";
 import { vertexShaderRegistry } from "@/components/WebGLShader/shaders/vertexShaders";
 import { FragmentShader } from "@/components/WebGLShader/shaders/types";
 
@@ -40,7 +43,7 @@ export const WebGLShaderCanvas = (
 		const values: Record<string, number> = {};
 		for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
 			values[key] = uniform.value;
-		}
+		};
 		return values;
 	}, [fragmentShader.uniforms]);
 
@@ -52,7 +55,7 @@ export const WebGLShaderCanvas = (
 		setDimensions(prev => {
 			if (prev.width === width && prev.height === height) {
 				return prev;
-			}
+			};
 			return { width, height };
 		});
 	}, []);
@@ -84,6 +87,10 @@ export const WebGLShaderCanvas = (
 		if (!canvas) return;
 
 
+
+
+
+
 		if (!rendererRef.current) {
 			rendererRef.current = new WebGLRenderer(
 				canvas,
@@ -94,8 +101,12 @@ export const WebGLShaderCanvas = (
 			);
 			for (const [key, value] of Object.entries(uniformValues)) {
 				rendererRef.current.setUniform(key, value);
-			}
-		}
+			};
+		};
+
+
+
+
 
 
 		// Cleanup function with proper WebGL resource disposal
@@ -106,16 +117,16 @@ export const WebGLShaderCanvas = (
 					// Delete WebGL resources
 					if (renderer.program) {
 						renderer.gl.deleteProgram(renderer.program);
-					}
+					};
 					if (renderer.positionBuffer) {
 						renderer.gl.deleteBuffer(renderer.positionBuffer);
-					}
+					};
 					if (renderer.gradientTexture) {
 						renderer.gl.deleteTexture(renderer.gradientTexture);
-					}
-				}
+					};
+				};
 				rendererRef.current = null;
-			}
+			};
 		};
 
 
@@ -159,7 +170,7 @@ export const WebGLShaderCanvas = (
 		const animate = () => {
 			if (!isPausedRef.current) {
 				renderer.render();  // Only render when not paused
-			}
+			};
 			animationFrameRef.current = requestAnimationFrame(animate);  // Always continue loop
 		};
 
@@ -169,7 +180,7 @@ export const WebGLShaderCanvas = (
 			if (animationFrameRef.current) {
 				cancelAnimationFrame(animationFrameRef.current);
 				animationFrameRef.current = undefined;
-			}
+			};
 		};
 	}, []); // Only run once
 

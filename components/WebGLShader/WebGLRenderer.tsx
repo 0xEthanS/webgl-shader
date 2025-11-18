@@ -181,7 +181,6 @@ export class WebGLRenderer {
 		canvas.width = width;
 		const ctx = canvas.getContext("2d");
 		if (!ctx) throw new Error("Failed to get canvas 2D context");
-
 		// Render gradient to texture
 		const linearGradient = ctx.createLinearGradient(0, 0, width, 0);
 		for (const [i, stop] of gradient.entries()) {

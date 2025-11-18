@@ -1,8 +1,5 @@
 import { WebGLShader } from "@/components/WebGLShader/WebGLShader";
 
-
-
-
 export default function Home() {
 	return (
 		<div className="
@@ -17,23 +14,25 @@ export default function Home() {
 				mt-10 
 				rounded-xl 
 				overflow-hidden 
-
 				bg-slate-300
 			"
 		>
-
-
 			<WebGLShader 
-				colorConfiguration={"default"} // color definition
-				fragmentShaderValue={"final"} // shader shape
+				colorConfiguration={"default"} 
+				fragmentShaderValue={"final"} 
 				seed={16192} 
 			/>
+
+		
+
+
+
+
 
 
 		</div>
 	);
 }
-
 
 
 
